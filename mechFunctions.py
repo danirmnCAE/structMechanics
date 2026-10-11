@@ -7,7 +7,6 @@ SI units throughout unless explicitly noted in a function's docstring:
     length [m], pressure/stress [Pa], force [N], moment [N*m], angle [rad].
 """
 from ast import expr
-from ast import expr
 import numpy as np
 import sympy as sp
 import matplotlib.pyplot as plt
@@ -18,7 +17,7 @@ import matplotlib.pyplot as plt
 
 # Centroid of a cross-section built up from rectangular sub-areas
 def centroid_2Drectangles(*sections):
-    # ensure input is a 2D array of shape (n, 4) where each row is [xc, yc, w, h]
+    # ensure input is a 2D array of shape (n, 4) where each row is [xc, yc, base, height]
     sec = np.asarray(sections, dtype=float) 
     if sec.ndim != 2 or sec.shape[1] != 4:
         raise ValueError("each section must be a 4-vector [xc, yc, base, height]")
@@ -33,6 +32,21 @@ def centroid_2Drectangles(*sections):
     x_bar = (Ai * xc).sum() / A_total
     y_bar = (Ai * yc).sum() / A_total
     return x_bar, y_bar
+
+# Centroid of a triangle from its three vertices in the xy plane; the centroid
+# is the mean of the vertices, whatever their order
+def centroid_2Dtriangle(p1, p2, p3):
+    # ensure input is a 2D array of shape (3, 2) where each row is a vertex [x, y]
+    pts = np.asarray([p1, p2, p3], dtype=float)     # vertex coordinates [m]
+    if pts.shape != (3, 2):
+        raise ValueError("each vertex must be a 2-vector [x, y]")
+    (x1, y1), (x2, y2), (x3, y3) = pts
+    # collinear vertices enclose no area
+    if (x2 - x1) * (y3 - y1) - (x3 - x1) * (y2 - y1) == 0.0:
+        raise ValueError("vertices are collinear; centroid is undefined")
+    x_bar = (x1 + x2 + x3) / 3.0
+    y_bar = (y1 + y2 + y3) / 3.0
+    return x_bar, y_bar                             # centroid coordinates [m]
 
 # Centroid of a 2D area bounded above by y = f(x) and below by y = 0, over [a, b]
 def centroid_2Darea(function, x, a, b):
